@@ -1,5 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
+using KiiCorp.Cloud.Analytics;
+using KiiCorp.Cloud.Storage;
+using System;
 
 public class bird : MonoBehaviour {
 	public float upForce;
@@ -24,6 +27,7 @@ public class bird : MonoBehaviour {
 		var pos = new Vector3 (birdPos.x,transform.position.y, transform.position.z);
 		transform.position = pos;
 		if ((Input.GetKeyDown (KeyCode.Space)||Input.GetMouseButtonDown(0))&&!GameManager.gameOver&&GameManager.gameStart) {
+			GameManager.clickTimes ++;
 			rigidbody2D.velocity = new Vector2 (0f,upForce);
 			}
 		if (rigidbody2D.velocity.y < upForce-some && transform.rotation.y > -90&&GameManager.gameStart) {
@@ -61,6 +65,7 @@ public class bird : MonoBehaviour {
 						GameManager.score += 1;
 						Destroy (other.gameObject);
 				} else {
+			saveDataToKiiCloud();
 			gameObject.collider2D.isTrigger=false;
 			AudioSource.PlayClipAtPoint(hit, Camera.main.transform.position);
 						if(GameManager.score>PlayerPrefs.GetInt("highscore")){
@@ -71,5 +76,41 @@ public class bird : MonoBehaviour {
 			}
 						GameManager.gameOver = true;
 				}
+	}
+	void saveDataToKiiCloud ()
+	{
+		float time = Time.time - GameManager.startTime;
+		KiiEvent ev = KiiAnalytics.NewEvent("OneGame");
+		ev["time"] = time;
+		ev["clickTimes"] = GameManager.clickTimes;
+		ev["score"] = GameManager.score;
+		ev["deviceID"] = SystemInfo.deviceUniqueIdentifier;
+		KiiAnalytics.Upload((Exception e) => {
+			if (e != null)
+			{
+				string message = "Failed to upload events " + e.ToString();
+				Debug.Log (message);
+				return;
+			}  
+			Debug.Log ("event upload succeeded");
+		}, ev);
+		KiiObject obj = Kii.Bucket("OneGame").NewKiiObject();
+		
+		obj["time"] = time;
+		obj["clickTimes"] = GameManager.clickTimes;
+		obj["score"] = GameManager.score;
+		obj["deviceID"] = SystemInfo.deviceUniqueIdentifier;
+
+		// Save the object
+		obj.Save((KiiObject savedObj, Exception e) => {
+			if (e != null)
+			{
+				// Handle error
+				string message = "Failed to upload OneGame data " + e.ToString();
+				Debug.Log (message);
+				return;
+			}
+			Debug.Log ("OneGame save succeeded");
+		});
 	}
 }
