@@ -33,7 +33,7 @@ public class GameManager : MonoBehaviour {
 				}
 		if (gameStart)
 				if (Input.GetKeyUp (KeyCode.Escape)) {
-						
+						saveDataToKiiCloud ();
 						Application.Quit ();
 				}
 	}
