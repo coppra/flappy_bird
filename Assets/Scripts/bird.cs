@@ -77,6 +77,8 @@ public class bird : MonoBehaviour {
 						GameManager.gameOver = true;
 				}
 	}
+
+	//Save OneGame data as both event and data object
 	void saveDataToKiiCloud ()
 	{
 		float time = Time.time - GameManager.startTime;
