@@ -82,20 +82,6 @@ public class bird : MonoBehaviour {
 	void saveDataToKiiCloud ()
 	{
 		float time = Time.time - GameManager.startTime;
-		KiiEvent ev = KiiAnalytics.NewEvent("OneGame");
-		ev["time"] = time;
-		ev["clickTimes"] = GameManager.clickTimes;
-		ev["score"] = GameManager.score;
-		ev["deviceID"] = SystemInfo.deviceUniqueIdentifier;
-		KiiAnalytics.Upload((Exception e) => {
-			if (e != null)
-			{
-				string message = "Failed to upload events " + e.ToString();
-				Debug.Log (message);
-				return;
-			}  
-			Debug.Log ("event upload succeeded");
-		}, ev);
 		KiiObject obj = Kii.Bucket("OneGame").NewKiiObject();
 		
 		obj["time"] = time;
